@@ -40,5 +40,8 @@ public class MainController {
   public String community() {
     return "community";
   }
+  @GetMapping("/test")
+  public String test() {
+    return "member/test";  }
 
 }

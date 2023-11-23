@@ -1,8 +1,8 @@
-package com.project.Restaurant.Member;
+package com.project.Restaurant.Member.owner;
 
-import jakarta.transaction.Transactional;
+import com.project.Restaurant.Member.MemberRole;
+import com.project.Restaurant.Member.consumer.Customer;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -17,29 +17,24 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class MemberSecurityService implements UserDetailsService {
+public class OwnerDetailsService implements UserDetailsService {
 
-    private final MemberRepository memberRepository;
+    private final OwnerRepository ownerRepository;
 
     @Override
-    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Member> _member = memberRepository.findByusername(username);
-        if (_member.isEmpty()) {
+        System.out.println("오너");
+        Optional<Owner> _owner = ownerRepository.findByusername(username);
+        if (_owner.isEmpty()) {
             throw new UsernameNotFoundException("사용자를 찾을수 없습니다.");
         }
-        Member member = _member.get();
-        if (!member.getMemberActivation()) {
-            throw new DisabledException("계정이 활성화되지 않았습니다. 관리자의 승인을 기다려주세요.");
-        }
+        Owner owner = _owner.get();
         List<GrantedAuthority> authorities = new ArrayList<>();
         if ("admin".equals(username)) {
             authorities.add(new SimpleGrantedAuthority(MemberRole.ADMIN.getValue()));
-        } else if ("customer".equals(member.getAuthority())){
-            authorities.add(new SimpleGrantedAuthority(MemberRole.CUSTOMER.getValue()));
-        } else if ("seller".equals(member.getAuthority())) {
-            authorities.add(new SimpleGrantedAuthority((MemberRole.SELLER.getValue())));
+        } else {
+            authorities.add(new SimpleGrantedAuthority(MemberRole.OWNER.getValue()));
         }
-        return new User(member.getUsername(), member.getPassword(), authorities);
+        return new User(owner.getUsername(), owner.getPassword(), authorities);
     }
 }
