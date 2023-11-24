@@ -40,8 +40,8 @@ public class MemberController {
         return "member/find_username_form";
     }
 
-    @GetMapping("resetPassword")
-    public String resetPassword() {
+    @GetMapping("usernameEmail")
+    public String usernameEmail() {
         return "member/username_email_form";
     }
 }

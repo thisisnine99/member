@@ -1,6 +1,7 @@
 package com.project.Restaurant.Member.consumer;
 
 import com.project.Restaurant.Member.MemberCreateForm;
+import com.project.Restaurant.Member.PasswordResetFrom;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -74,8 +75,8 @@ public class CustomerController {
         }
     }
 
-    @PostMapping("/resetPassword")
-    public String resetPassword(String username, String email, Model model) {
+    @PostMapping("/usernameEmail")
+    public String usernameEmail(String username, String email, Model model) {
         Customer targetCustomer = customerService.findByusername(username);
         String message = "아이디 또는 이메일을 확인해주세요";
         if (targetCustomer == null) {
@@ -90,5 +91,30 @@ public class CustomerController {
                 return "member/reset_password_form";
             }
         }
+    }
+
+    @PostMapping("/resetPassword")
+    public String resetPassword(String targetMemberUsername, @Valid PasswordResetFrom passwordResetFrom,
+                                BindingResult bindingResult, Model model) {
+        Customer targetCustomer = customerService.findByusername(targetMemberUsername);
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("targetMember", targetCustomer);
+            return "member/reset_password_form";
+        }
+        if (!passwordResetFrom.getPassword().equals(passwordResetFrom.getPasswordConfirm())) {
+            bindingResult.rejectValue("passwordConfirm", "passwordInCorrect",
+                    "패스워드가 일치하지 않습니다.");
+            model.addAttribute("targetMember", targetCustomer);
+            return "member/reset_password_form";
+        }
+        try {
+            customerService.resetPassword(targetCustomer, passwordResetFrom.getPassword());
+        } catch (Exception e) {
+            e.printStackTrace();
+            bindingResult.reject("PasswordRestFailed", e.getMessage());
+            model.addAttribute("targetMember", targetCustomer);
+            return "member/reset_password_form";
+        }
+        return "member/login_form";
     }
 }

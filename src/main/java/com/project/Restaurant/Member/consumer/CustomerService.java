@@ -23,6 +23,11 @@ public class CustomerService {
         customerRepository.save(customer);
     }
 
+    public void resetPassword(Customer customer, String password) {
+        customer.setPassword(passwordEncoder.encode(password));
+        customerRepository.save(customer);
+    }
+
     public Customer findByusername(String username) {
         if (customerRepository.findByusername(username).isPresent()) {
             return customerRepository.findByusername(username).get();
